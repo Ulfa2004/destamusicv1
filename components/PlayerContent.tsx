@@ -1,19 +1,21 @@
 "use client";
 
-
 import { useEffect, useState } from "react";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 import { AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
+import useSound from 'use-sound';
 
 import { Song } from "@/types";
 import usePlayer from "@/hooks/usePlayer";
+// IMPORT BARU: Hook untuk layar penuh
+import usePlayerView from "@/hooks/usePlayerView";
 
 import LikeButton from "./LikeButton";
 import MediaItem from "./MediaItem";
 import Slider from "./Slider";
-import useSound from 'use-sound';
-
+// IMPORT BARU: Komponen layar penuh
+import FullScreenPlayer from "./FullScreenPlayer";
 
 interface PlayerContentProps {
   song: Song;
@@ -25,6 +27,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   songUrl
 }) => {
   const player = usePlayer();
+  // HOOK BARU: Panggil hook view
+  const playerView = usePlayerView();
   const [volume, setVolume] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -99,11 +103,37 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     }
   }
 
+  // --- FITUR BARU: NOTIFIKASI MEDIA SESSION (LOCK SCREEN) ---
+  useEffect(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: song.title,
+        artist: song.author,
+        artwork: [
+          { src: song.image_path || '/images/liked.png', sizes: '512x512', type: 'image/jpeg' }
+        ]
+      });
+
+      navigator.mediaSession.setActionHandler('play', handlePlay);
+      navigator.mediaSession.setActionHandler('pause', handlePlay);
+      navigator.mediaSession.setActionHandler('previoustrack', onPlayPrevious);
+      navigator.mediaSession.setActionHandler('nexttrack', onPlayNext);
+    }
+  }, [song, handlePlay, onPlayNext, onPlayPrevious]);
+  // -----------------------------------------------------------
+
   return ( 
     <div className="grid grid-cols-2 md:grid-cols-3 h-full">
         <div className="flex w-full justify-start">
           <div className="flex items-center gap-x-4">
-            <MediaItem data={song} />
+            {/* FITUR BARU: Klik di sini untuk membesarkan player */}
+            <div 
+              onClick={playerView.onOpen}
+              className="cursor-pointer hover:opacity-75 transition"
+            >
+              <MediaItem data={song} />
+            </div>
+            
             <LikeButton songId={song.id} />
           </div>
         </div>
@@ -199,6 +229,19 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
             />
           </div>
         </div>
+
+        {/* FITUR BARU: Komponen Layar Penuh */}
+        <FullScreenPlayer 
+          song={song}
+          songUrl={songUrl}
+          isPlaying={isPlaying}
+          volume={volume}
+          togglePlay={handlePlay}
+          toggleMute={toggleMute}
+          onNext={onPlayNext}
+          onPrevious={onPlayPrevious}
+          onChangeVolume={setVolume}
+        />
 
       </div>
    );
