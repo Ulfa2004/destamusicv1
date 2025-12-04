@@ -27,14 +27,14 @@ const Library: React.FC<LibraryProps> = ({
   const onPlay = useOnPlay(songs);
 
   const onClick = () => {
+    // Cek apakah user sudah login
     if (!user) {
       return authModal.onOpen();
     }
 
-    if (!subscription) {
-      return subscribeModal.onOpen();
-    }
-
+    // BAGIAN HAPUS: Syarat harus langganan (subscription) sudah dibuang.
+    // Sekarang langsung buka menu upload.
+    
     return uploadModal.onOpen();
   }
 
