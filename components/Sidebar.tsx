@@ -41,6 +41,8 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
     <div 
       className={twMerge(`
         flex 
+        flex-col       // UBAHAN 1: Di HP susun ke bawah (Sidebar di atas, konten di bawah)
+        md:flex-row    // Di Laptop susun ke samping (Sidebar di kiri, konten di kanan)
         h-full
         `,
         player.activeId && 'h-[calc(100%-80px)]'
@@ -48,13 +50,14 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
     >
       <div 
         className="
-          hidden 
-          md:flex 
+          flex          // UBAHAN 2: Hapus 'hidden', jadi selalu muncul
           flex-col 
           gap-y-2 
           bg-black 
-          h-full 
-          w-[300px] 
+          h-auto        // UBAHAN 3: Di HP tingginya menyesuaikan isi
+          md:h-full     // Di Laptop tingginya full layar
+          w-full        // UBAHAN 4: Di HP lebarnya full
+          md:w-[300px]  // Di Laptop lebarnya tetap 300px
           p-2
         "
       >
@@ -65,6 +68,8 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
             ))}
           </div>
         </Box>
+        
+        {/* Opsional: Library tetap bisa di-scroll di dalam kotak kecil jika di HP */}
         <Box className="overflow-y-auto h-full">
           <Library songs={songs} />
         </Box>
