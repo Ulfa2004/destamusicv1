@@ -8,12 +8,12 @@ import useSound from 'use-sound';
 
 import { Song } from "@/types";
 import usePlayer from "@/hooks/usePlayer";
-import usePlayerView from "@/hooks/usePlayerView"; // Hook Layar Penuh
+import usePlayerView from "@/hooks/usePlayerView";
 
 import LikeButton from "./LikeButton";
 import MediaItem from "./MediaItem";
 import Slider from "./Slider";
-import FullScreenPlayer from "./FullScreenPlayer"; // Komponen Layar Penuh
+import FullScreenPlayer from "./FullScreenPlayer";
 
 interface PlayerContentProps {
   song: Song;
@@ -62,6 +62,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     player.setId(previousSong);
   }
 
+  // --- SETTING PEMUTAR MUSIK ---
   const [play, { pause, sound }] = useSound(
     songUrl,
     { 
@@ -72,7 +73,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
         onPlayNext();
       },
       onpause: () => setIsPlaying(false),
-      format: ['mp3']
+      format: ['mp3'],
+      html5: true    // <--- INI KUNCI UTAMANYA! (Wajib ada biar notif muncul)
     }
   );
 
@@ -100,7 +102,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     }
   }
 
-  // --- BAGIAN INI YANG MEMUNCULKAN NOTIFIKASI DI HP ---
+  // --- BAGIAN NOTIFIKASI HP (MEDIA SESSION) ---
   useEffect(() => {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -117,117 +119,63 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
       navigator.mediaSession.setActionHandler('nexttrack', onPlayNext);
     }
   }, [song, handlePlay, onPlayNext, onPlayPrevious]);
-  // ----------------------------------------------------
+
+  // UPDATE STATUS PLAY/PAUSE DI NOTIFIKASI
+  useEffect(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }
+  }, [isPlaying]);
 
   return ( 
     <div className="grid grid-cols-2 md:grid-cols-3 h-full">
         <div className="flex w-full justify-start">
           <div className="flex items-center gap-x-4">
-            {/* Klik gambar untuk buka Layar Penuh */}
             <div 
               onClick={playerView.onOpen}
               className="cursor-pointer hover:opacity-75 transition"
             >
               <MediaItem data={song} />
             </div>
-            
             <LikeButton songId={song.id} />
           </div>
         </div>
 
-        <div 
-          className="
-            flex 
-            md:hidden 
-            col-auto 
-            w-full 
-            justify-end 
-            items-center
-          "
-        >
+        <div className="flex md:hidden col-auto w-full justify-end items-center">
           <div 
             onClick={handlePlay} 
-            className="
-              h-10
-              w-10
-              flex 
-              items-center 
-              justify-center 
-              rounded-full 
-              bg-white 
-              p-1 
-              cursor-pointer
-            "
+            className="h-10 w-10 flex items-center justify-center rounded-full bg-white p-1 cursor-pointer"
           >
             <Icon size={30} className="text-black" />
           </div>
         </div>
 
-        <div 
-          className="
-            hidden
-            h-full
-            md:flex 
-            justify-center 
-            items-center 
-            w-full 
-            max-w-[722px] 
-            gap-x-6
-          "
-        >
+        <div className="hidden h-full md:flex justify-center items-center w-full max-w-[722px] gap-x-6">
           <AiFillStepBackward
             onClick={onPlayPrevious}
             size={30} 
-            className="
-              text-neutral-400 
-              cursor-pointer 
-              hover:text-white 
-              transition
-            "
+            className="text-neutral-400 cursor-pointer hover:text-white transition"
           />
           <div 
             onClick={handlePlay} 
-            className="
-              flex 
-              items-center 
-              justify-center
-              h-10
-              w-10 
-              rounded-full 
-              bg-white 
-              p-1 
-              cursor-pointer
-            "
+            className="flex items-center justify-center h-10 w-10 rounded-full bg-white p-1 cursor-pointer"
           >
             <Icon size={30} className="text-black" />
           </div>
           <AiFillStepForward
             onClick={onPlayNext}
             size={30} 
-            className="
-              text-neutral-400 
-              cursor-pointer 
-              hover:text-white 
-              transition
-            " 
+            className="text-neutral-400 cursor-pointer hover:text-white transition" 
           />
         </div>
 
         <div className="hidden md:flex w-full justify-end pr-2">
           <div className="flex items-center gap-x-2 w-[120px]">
-            <VolumeIcon 
-              onClick={toggleMute} 
-              className="cursor-pointer" 
-              size={34} 
-            />
-            <Slider 
-              value={volume} 
-              onChange={(value) => setVolume(value)}
-            />
+            <VolumeIcon onClick={toggleMute} className="cursor-pointer" size={34} />
+            <Slider value={volume} onChange={(value) => setVolume(value)} />
           </div>
         </div>
 
-        {/* Komponen Layar Penuh */}
         <FullScreenPlayer 
           song={song}
           songUrl={songUrl}
@@ -239,7 +187,6 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
           onPrevious={onPlayPrevious}
           onChangeVolume={setVolume}
         />
-
       </div>
    );
 }
