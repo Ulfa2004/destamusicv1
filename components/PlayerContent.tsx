@@ -8,14 +8,12 @@ import useSound from 'use-sound';
 
 import { Song } from "@/types";
 import usePlayer from "@/hooks/usePlayer";
-// IMPORT BARU: Hook untuk layar penuh
-import usePlayerView from "@/hooks/usePlayerView";
+import usePlayerView from "@/hooks/usePlayerView"; // Hook Layar Penuh
 
 import LikeButton from "./LikeButton";
 import MediaItem from "./MediaItem";
 import Slider from "./Slider";
-// IMPORT BARU: Komponen layar penuh
-import FullScreenPlayer from "./FullScreenPlayer";
+import FullScreenPlayer from "./FullScreenPlayer"; // Komponen Layar Penuh
 
 interface PlayerContentProps {
   song: Song;
@@ -27,7 +25,6 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   songUrl
 }) => {
   const player = usePlayer();
-  // HOOK BARU: Panggil hook view
   const playerView = usePlayerView();
   const [volume, setVolume] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -103,7 +100,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     }
   }
 
-  // --- FITUR BARU: NOTIFIKASI MEDIA SESSION (LOCK SCREEN) ---
+  // --- BAGIAN INI YANG MEMUNCULKAN NOTIFIKASI DI HP ---
   useEffect(() => {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -120,13 +117,13 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
       navigator.mediaSession.setActionHandler('nexttrack', onPlayNext);
     }
   }, [song, handlePlay, onPlayNext, onPlayPrevious]);
-  // -----------------------------------------------------------
+  // ----------------------------------------------------
 
   return ( 
     <div className="grid grid-cols-2 md:grid-cols-3 h-full">
         <div className="flex w-full justify-start">
           <div className="flex items-center gap-x-4">
-            {/* FITUR BARU: Klik di sini untuk membesarkan player */}
+            {/* Klik gambar untuk buka Layar Penuh */}
             <div 
               onClick={playerView.onOpen}
               className="cursor-pointer hover:opacity-75 transition"
@@ -230,7 +227,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
           </div>
         </div>
 
-        {/* FITUR BARU: Komponen Layar Penuh */}
+        {/* Komponen Layar Penuh */}
         <FullScreenPlayer 
           song={song}
           songUrl={songUrl}
