@@ -5,11 +5,13 @@ import * as RadixSlider from '@radix-ui/react-slider';
 interface SlideProps {
   value?: number;
   onChange?: (value: number) => void;
+  max?: number; // <--- PERBAIKAN 1: Menambahkan prop max ke interface
 }
 
 const Slider: React.FC<SlideProps> = ({ 
   value = 1, 
-  onChange
+  onChange,
+  max = 1 // <--- PERBAIKAN 2: Menerima prop max (default 1 untuk volume)
 }) => {
   const handleChange = (newValue: number[]) => {
     onChange?.(newValue[0]);
@@ -29,7 +31,7 @@ const Slider: React.FC<SlideProps> = ({
       defaultValue={[1]}
       value={[value]}
       onValueChange={handleChange}
-      max={1}
+      max={max} // <--- PERBAIKAN 3: Menggunakan prop max yang dinamis
       step={0.1}
       aria-label="Volume"
     >
