@@ -3,19 +3,19 @@
 import { useMemo } from "react";
 import { HiHome } from "react-icons/hi";
 import { BiSearch } from "react-icons/bi";
-// IMPORT BARU: Icon Plus yang lebih tegas
 import { AiOutlinePlus } from "react-icons/ai";
 import { twMerge } from "tailwind-merge";
 import { usePathname } from "next/navigation";
 
 import { Song } from "@/types";
 import usePlayer from "@/hooks/usePlayer";
-// IMPORT BARU: Hook untuk membuka modal upload
 import useUploadModal from "@/hooks/useUploadModal";
+import useAuthModal from "@/hooks/useAuthModal"; // Pastikan ini diimport
 
 import SidebarItem from "./SidebarItem";
 import Box from "./Box";
 import Library from "./Library";
+import { useUser } from "@/hooks/useUser"; // Pastikan ini diimport
 
 interface SidebarProps {
   children: React.ReactNode;
@@ -25,8 +25,9 @@ interface SidebarProps {
 const Sidebar = ({ children, songs }: SidebarProps) => {
   const pathname = usePathname();
   const player = usePlayer();
-  // HOOK BARU: Panggil fungsi upload modal
   const uploadModal = useUploadModal();
+  const authModal = useAuthModal();
+  const { user } = useUser();
 
   const routes = useMemo(() => [
     {
@@ -43,6 +44,14 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
     },
   ], [pathname]);
 
+  const onUploadClick = () => {
+    if (!user) {
+      return authModal.onOpen();
+    }
+    // Karena kita sudah matikan premium check di Library.tsx, ini akan langsung buka modal upload
+    uploadModal.onOpen();
+  };
+
   return (
     <div 
       className={twMerge(`
@@ -53,7 +62,7 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
         `
       )}
     >
-      {/* --- SIDEBAR LAPTOP (Tidak Berubah) --- */}
+      {/* --- SIDEBAR LAPTOP (Di Kiri) --- */}
       <div 
         className="
           hidden 
@@ -78,20 +87,18 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
         </Box>
       </div>
 
-      {/* --- MENU BAWAH HP (NATIVE STYLE DENGAN TOMBOL TENGAH) --- */}
+      {/* --- MENU BAWAH HP (BOTTOM NAVIGATION) --- */}
       <div className="md:hidden fixed bottom-0 w-full bg-black z-50 p-2 border-t border-neutral-800 h-[80px]">
          <Box className="h-full justify-center">
-           {/* Kita susun manual secara horizontal: Home - Tambah - Search */}
            <div className="flex flex-row justify-between items-end w-full px-8 h-full pb-1">
              
-             {/* 1. Tombol Home (Kiri) */}
+             {/* Tombol Home */}
              <SidebarItem {...routes[0]} />
 
-             {/* 2. TOMBOL UPLOAD TENGAH YANG KEREN */}
-             {/* Kita bungkus div dengan negative margin-top supaya dia "mengapung" keluar batas atas */}
+             {/* TOMBOL UPLOAD TENGAH */}
              <div className="relative -top-5">
                 <button 
-                  onClick={uploadModal.onOpen}
+                  onClick={onUploadClick}
                   className="
                     h-16 w-16
                     rounded-full
@@ -100,21 +107,22 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
                     hover:scale-105 hover:bg-green-400
                     transition
                     shadow-xl shadow-neutral-900/50
-                    border-[4px] border-black /* Border hitam agar menyatu dengan background */
+                    border-[4px] border-black
                   "
                 >
                   <AiOutlinePlus className="text-black font-bold" size={32} />
                 </button>
              </div>
 
-             {/* 3. Tombol Search (Kanan) */}
+             {/* Tombol Search */}
              <SidebarItem {...routes[1]} />
              
            </div>
          </Box>
       </div>
       
-      <main className="h-full flex-1 overflow-y-auto py-2 pb-[150px] md:pb-0">
+      {/* PERBAIKAN PADDING: Reservasi ruang untuk Player (80px) + Navigasi (80px) = 160px */}
+      <main className="h-full flex-1 overflow-y-auto py-2 pb-[160px] md:pb-0">
         {children}
       </main>
     </div>
