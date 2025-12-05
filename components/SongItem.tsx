@@ -16,7 +16,7 @@ const SongItem: React.FC<SongItemProps> = ({
   data,
   onClick
 }) => {
-  const imagePath = useLoadImage(data);
+  const imagePath = useLoadImage(data.image_path); // Menggunakan data.image_path sebagai input
 
   return ( 
     <div
@@ -36,6 +36,8 @@ const SongItem: React.FC<SongItemProps> = ({
         hover:bg-neutral-400/10 
         transition 
         p-3
+        w-full
+        max-w-[160px] // UBAHAN: Membatasi lebar kartu agar terlihat lebih kecil
       "
     >
       <div 
