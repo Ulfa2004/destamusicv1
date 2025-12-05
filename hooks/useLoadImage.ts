@@ -1,18 +1,17 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 
-import { Song } from "@/types";
-
-const useLoadImage = (song: Song) => {
+const useLoadImage = (imagePath: string) => {
   const supabaseClient = useSupabaseClient();
-  
-  if (!song) {
+
+  if (!imagePath) {
     return null;
   }
 
+  // Mendapatkan URL publik secara aman dan pasti
   const { data: imageData } = supabaseClient
     .storage
-    .from('images')
-    .getPublicUrl(song.image_path);
+    .from('images') // Pastikan nama bucket kamu 'images'
+    .getPublicUrl(imagePath);
 
   return imageData.publicUrl;
 };
