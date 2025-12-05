@@ -46,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({
       className={twMerge(`
         h-fit 
         bg-gradient-to-b 
-        from-neutral-900 // PERBAIKAN: Ganti 'from-emerald-800' menjadi netral/hitam
+        from-neutral-900 // PERBAIKAN: BASE COLOR SUDAH AMAN
         p-6
         `,
         className
@@ -57,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({
             onClick={() => router.back()} 
             className="
               rounded-full 
-              bg-black 
+              bg-neutral-900 // Ganti 'bg-black' menjadi netral
               flex 
               items-center 
               justify-center 
@@ -72,7 +72,7 @@ const Header: React.FC<HeaderProps> = ({
             onClick={() => router.forward()} 
             className="
               rounded-full 
-              bg-black 
+              bg-neutral-900 // Ganti 'bg-black' menjadi netral
               flex 
               items-center 
               justify-center 
