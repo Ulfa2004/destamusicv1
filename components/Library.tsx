@@ -2,17 +2,15 @@
 
 import { TbPlaylist } from "react-icons/tb";
 import { AiOutlinePlus } from "react-icons/ai";
-import { useRouter } from "next/navigation"; // IMPORT BARU: Untuk navigasi ke playlist
+import { useRouter } from "next/navigation"; // IMPORT BARU
+import { useMemo } from 'react'; // IMPORT BARU
 
-import { Song } from "@/types";
+import { Song, Playlist } from "@/types"; // Import Playlist (Asumsi ada di types.ts)
 import useUploadModal from "@/hooks/useUploadModal";
 import { useUser } from "@/hooks/useUser";
 import useAuthModal from "@/hooks/useAuthModal";
-import useSubscribeModal from "@/hooks/useSubscribeModal";
 import useOnPlay from "@/hooks/useOnPlay";
-// IMPORT BARU: Untuk Playlist
-import useCreatePlaylistModal from "@/hooks/useCreatePlaylistModal";
-import { Playlist } from "@/types"; // Asumsi Anda memiliki tipe Playlist di sini
+import useCreatePlaylistModal from "@/hooks/useCreatePlaylistModal"; // IMPORT BARU
 
 import MediaItem from "./MediaItem";
 
@@ -26,31 +24,27 @@ const Library: React.FC<LibraryProps> = ({
   playlists // DITERIMA DI SINI
 }) => {
   const { user } = useUser();
-  const uploadModal = useUploadModal();
   const authModal = useAuthModal();
-  const subscribeModal = useSubscribeModal();
   const createPlaylistModal = useCreatePlaylistModal(); // HOOK BARU
-
-  const onPlay = useOnPlay(songs);
   const router = useRouter(); // HOOK BARU
 
+  const onPlay = useOnPlay(songs);
+
   const onClick = () => {
-    // Cek apakah user sudah login
+    // Tombol '+' sekarang untuk Buat Playlist
     if (!user) {
       return authModal.onOpen();
     }
-    
-    // UBAHAN FUNGSI: Tombol '+' sekarang membuka modal Buat Playlist
     return createPlaylistModal.onOpen(); 
   }
 
-  // Helper untuk membuat objek Song palsu untuk display playlist
+  // Helper untuk membuat objek tampilan playlist agar bisa dirender MediaItem
   const createPlaylistData = (item: Playlist) => ({
       id: item.id,
       title: item.title,
       author: 'Playlist Anda', 
-      song_path: '', // Kosongkan path lagu
-      image_path: item.image_path || '', // Gunakan image_path playlist jika ada
+      song_path: '',
+      image_path: item.image_path || '', // Ambil gambar playlist jika ada
   } as Song);
 
 
@@ -77,16 +71,18 @@ const Library: React.FC<LibraryProps> = ({
       </div>
       
       {/* --- DAFTAR PLAYLISTS (Fitur Baru) --- */}
-      <div className="flex flex-col gap-y-2 mt-4 px-3">
-        {playlists.map((item) => (
-          <MediaItem 
-            // Navigasi ke halaman playlist yang baru (misalnya /playlist/uuid)
-            onClick={() => router.push(`/playlist/${item.id}`)} 
-            key={item.id} 
-            data={createPlaylistData(item)} // Gunakan data yang disederhanakan
-          />
-        ))}
-      </div>
+      {playlists.length > 0 && (
+        <div className="flex flex-col gap-y-2 mt-4 px-3">
+          {playlists.map((item) => (
+            <MediaItem 
+              // Navigasi ke halaman playlist (Anda harus membuat route ini nanti!)
+              onClick={() => router.push(`/playlist/${item.id}`)} 
+              key={item.id} 
+              data={createPlaylistData(item)} 
+            />
+          ))}
+        </div>
+      )}
       {/* ------------------------------------- */}
       
       {/* --- DAFTAR LAGU (Lama) --- */}
