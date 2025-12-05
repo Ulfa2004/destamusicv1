@@ -9,11 +9,12 @@ import { MdOutlinePlaylistAdd } from "react-icons/md";
 import { twMerge } from "tailwind-merge";
 import { usePathname } from "next/navigation";
 
-import { Song } from "@/types";
+// [1] IMPORT BARU: Import tipe Playlist
+import { Song, Playlist } from "@/types"; 
 import usePlayer from "@/hooks/usePlayer";
 import useUploadModal from "@/hooks/useUploadModal";
 import useAuthModal from "@/hooks/useAuthModal";
-import useCreatePlaylistModal from "@/hooks/useCreatePlaylistModal"; // IMPORT BARU: Hook Playlist
+import useCreatePlaylistModal from "@/hooks/useCreatePlaylistModal";
 
 import SidebarItem from "./SidebarItem";
 import Box from "./Box";
@@ -23,14 +24,15 @@ import { useUser } from "@/hooks/useUser";
 interface SidebarProps {
   children: React.ReactNode;
   songs: Song[];
+  playlists: Playlist[]; // [2] NEW PROP: Data playlist diterima di sini
 }
 
-const Sidebar = ({ children, songs }: SidebarProps) => {
+const Sidebar = ({ children, songs, playlists }: SidebarProps) => { // [3] Diterima sebagai argumen
   const pathname = usePathname();
   const player = usePlayer();
   const uploadModal = useUploadModal();
   const authModal = useAuthModal();
-  const createPlaylistModal = useCreatePlaylistModal(); // HOOK BARU
+  const createPlaylistModal = useCreatePlaylistModal();
 
   const { user } = useUser();
 
@@ -96,7 +98,8 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
           </div>
         </Box>
         <Box className="overflow-y-auto h-full">
-          <Library songs={songs} />
+          {/* [4] DITERUSKAN KE LIBRARY */}
+          <Library songs={songs} playlists={playlists} /> 
         </Box>
       </div>
 
@@ -109,7 +112,6 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
              <SidebarItem {...routes[0]} />
 
              {/* 2. TOMBOL UPLOAD MUSIK (BARU) */}
-             {/* Tambahkan tombol kecil di samping Home untuk Upload Musik */}
              <button onClick={onUploadClick} className="text-neutral-400 hover:text-white mb-2">
                 <AiOutlinePlus size={24} />
              </button>
@@ -117,11 +119,11 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
              {/* 3. TOMBOL BUAT PLAYLIST (TENGAH, Tombol Besar) */}
              <div className="relative -top-5">
                 <button 
-                  onClick={onCreatePlaylistClick} // Panggil fungsi Playlist yang baru
+                  onClick={onCreatePlaylistClick} // Panggil fungsi Playlist
                   className="
                     h-16 w-16
                     rounded-full
-                    bg-green-500 // Warna Hijau Spotify untuk tombol utama
+                    bg-green-500 
                     flex items-center justify-center
                     hover:scale-105 hover:bg-green-400
                     transition
@@ -129,7 +131,6 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
                     border-[4px] border-black
                   "
                 >
-                  {/* Icon Playlist di tombol utama */}
                   <MdOutlinePlaylistAdd className="text-black font-bold" size={32} />
                 </button>
              </div>
@@ -143,7 +144,6 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
          </Box>
       </div>
       
-      {/* PERBAIKAN PADDING: Reservasi ruang untuk Player (80px) + Navigasi (80px) = 160px */}
       <main className="h-full flex-1 overflow-y-auto py-2 pb-[160px] md:pb-0">
         {children}
       </main>
