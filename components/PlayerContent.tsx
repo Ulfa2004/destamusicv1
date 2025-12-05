@@ -29,6 +29,10 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   const [volume, setVolume] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // STATE BARU UNTUK DURASI DAN WAKTU BERJALAN
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
 
@@ -62,21 +66,46 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     player.setId(previousSong);
   }
 
+  // FUNGSI BARU UNTUK SEEKING (PINDAH WAKTU)
+  const onSeek = (value: number) => {
+    sound?.seek(value);
+  }
+
   // --- SETTING PEMUTAR MUSIK ---
   const [play, { pause, sound }] = useSound(
     songUrl,
     { 
       volume: volume,
-      onplay: () => setIsPlaying(true),
+      onplay: () => {
+        setIsPlaying(true);
+        // Pastikan durasi di-set saat lagu mulai dimainkan
+        if (sound) {
+          setDuration(sound.duration() || 0);
+        }
+      },
       onend: () => {
         setIsPlaying(false);
         onPlayNext();
       },
       onpause: () => setIsPlaying(false),
       format: ['mp3'],
-      html5: true    // <--- INI KUNCI UTAMANYA! (Wajib ada biar notif muncul)
+      html5: true,
+      onloaded: () => setDuration(sound?.duration() || 0), // Dapatkan durasi saat file selesai dimuat
+      onseek: () => setCurrentTime(sound?.seek() || 0), // Update waktu saat digeser
     }
   );
+
+  // LISTENER UNTUK UPDATE WAKTU BERJALAN (CURRENT TIME)
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(sound?.seek() || 0);
+    };
+
+    const interval = setInterval(updateTime, 1000); // Update setiap 1 detik
+    
+    return () => clearInterval(interval);
+  }, [sound]);
+
 
   useEffect(() => {
     sound?.play();
@@ -176,6 +205,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
           </div>
         </div>
 
+        {/* Kirim PROPS BARU ke FullScreenPlayer */}
         <FullScreenPlayer 
           song={song}
           songUrl={songUrl}
@@ -186,6 +216,10 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
           onNext={onPlayNext}
           onPrevious={onPlayPrevious}
           onChangeVolume={setVolume}
+          // PROPS BARU UNTUK TIMELINE
+          duration={duration}
+          currentTime={currentTime}
+          onSeek={onSeek}
         />
       </div>
    );
