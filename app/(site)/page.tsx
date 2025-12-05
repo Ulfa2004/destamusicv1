@@ -20,7 +20,7 @@ export default async function Home() {
         overflow-y-auto
       "
     >
-      <Header>
+      <Header className="from-sky-700"> {/* UBAHAN: Ganti warna gradient awal jadi biru muda (sky-700) */}
         <div className="mb-2">
           <h1 
             className="
