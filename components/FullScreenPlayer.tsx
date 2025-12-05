@@ -4,12 +4,15 @@ import Image from "next/image";
 import { AiOutlineClose, AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useMemo } from 'react'; // Digunakan untuk membuat URL gambar
 
 import { Song } from "@/types";
 import usePlayerView from "@/hooks/usePlayerView";
 import Slider from "./Slider";
 import LikeButton from "./LikeButton";
 
+// TIPE DATA BARU: Tambahkan properti untuk Durasi dan Pindah Waktu
 interface FullScreenPlayerProps {
   song: Song;
   songUrl: string;
@@ -20,6 +23,10 @@ interface FullScreenPlayerProps {
   onNext: () => void;
   onPrevious: () => void;
   onChangeVolume: (value: number) => void;
+  // PROPS BARU UNTUK TIMELINE
+  duration: number;
+  currentTime: number;
+  onSeek: (value: number) => void;
 }
 
 const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
@@ -30,11 +37,42 @@ const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
   toggleMute,
   onNext,
   onPrevious,
-  onChangeVolume
+  onChangeVolume,
+  // PROPS BARU
+  duration,
+  currentTime,
+  onSeek
 }) => {
   const playerView = usePlayerView();
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
+  const supabaseClient = useSupabaseClient(); // Panggil Supabase Client
+
+  // Solusi Gambar: Buat URL Publik dari image_path
+  const imageUrl = useMemo(() => {
+    if (!song) {
+      return '';
+    }
+    if (song.image_path) {
+      const { data: imageData } = supabaseClient
+        .storage
+        .from('images') // Pastikan nama bucket kamu 'images'
+        .getPublicUrl(song.image_path);
+
+      return imageData.publicUrl;
+    }
+    return '/images/liked.png'; // Fallback
+  }, [song, supabaseClient]);
+
+  // Helper untuk format detik ke menit:detik
+  const formatTime = (time: number) => {
+    if (time && !isNaN(time)) {
+      const minutes = Math.floor(time / 60);
+      const seconds = Math.floor(time % 60);
+      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+    return '0:00';
+  };
 
   if (!playerView.isOpen) return null;
 
@@ -48,10 +86,10 @@ const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
         </button>
       </div>
 
-      {/* Gambar Album Besar */}
+      {/* Gambar Album Besar - MENGGUNAKAN imageUrl */}
       <div className="flex-1 flex items-center justify-center relative w-full max-h-[50vh] aspect-square mx-auto mb-8 bg-neutral-800 rounded-md shadow-2xl overflow-hidden">
         <Image 
-          src={song.image_path || '/images/liked.png'} 
+          src={imageUrl} // Gunakan URL publik yang sudah dikonstruksi
           fill 
           alt="Cover" 
           className="object-cover"
@@ -72,6 +110,23 @@ const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({
             <LikeButton songId={song.id} />
         </div>
       </div>
+
+      {/* --- TIMELINE MUSIK (Fitur Baru) --- */}
+      <div className="w-full flex flex-col gap-y-2 mb-8">
+        <Slider 
+          value={currentTime} 
+          // Max value adalah total durasi lagu
+          max={duration} 
+          // Panggil fungsi onSeek (pindah waktu)
+          onChange={onSeek} 
+        />
+        <div className="flex justify-between text-xs text-neutral-400">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
+        </div>
+      </div>
+      {/* ------------------------------------- */}
+
 
       {/* Kontrol Utama */}
       <div className="flex flex-col items-center justify-center gap-y-6 w-full">
