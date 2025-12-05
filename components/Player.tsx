@@ -18,16 +18,17 @@ const Player = () => {
 
   return (
     <div 
-      className="
+    className="
         fixed 
-        bottom-0 
+        bottom-[80px]  // UBAHAN: Di HP, naikkan 80px supaya berada di atas Navigasi
+        md:bottom-0    // Di Laptop, tetap di bawah
         bg-black 
         w-full 
         py-2 
         h-[80px] 
         px-4
-      "
-    >
+    "
+>
  <PlayerContent key={songUrl} song={song} songUrl={songUrl} />
     </div>
   );
