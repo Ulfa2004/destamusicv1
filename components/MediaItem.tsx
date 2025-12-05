@@ -16,7 +16,8 @@ const MediaItem: React.FC<MediaItemProps> = ({
   onClick,
 }) => {
   const player = usePlayer();
-  const imageUrl = useLoadImage(data);
+  // PERBAIKAN: Mengambil jalur gambar spesifik dari objek data (data.image_path)
+  const imageUrl = useLoadImage(data.image_path); 
 
   const handleClick = () => {
     if (onClick) {
