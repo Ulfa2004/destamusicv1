@@ -3,19 +3,22 @@
 import { useMemo } from "react";
 import { HiHome } from "react-icons/hi";
 import { BiSearch } from "react-icons/bi";
+// Icon untuk Playlist dan Upload
 import { AiOutlinePlus } from "react-icons/ai";
+import { MdOutlinePlaylistAdd } from "react-icons/md"; 
 import { twMerge } from "tailwind-merge";
 import { usePathname } from "next/navigation";
 
 import { Song } from "@/types";
 import usePlayer from "@/hooks/usePlayer";
 import useUploadModal from "@/hooks/useUploadModal";
-import useAuthModal from "@/hooks/useAuthModal"; // Pastikan ini diimport
+import useAuthModal from "@/hooks/useAuthModal";
+import useCreatePlaylistModal from "@/hooks/useCreatePlaylistModal"; // IMPORT BARU: Hook Playlist
 
 import SidebarItem from "./SidebarItem";
 import Box from "./Box";
 import Library from "./Library";
-import { useUser } from "@/hooks/useUser"; // Pastikan ini diimport
+import { useUser } from "@/hooks/useUser";
 
 interface SidebarProps {
   children: React.ReactNode;
@@ -27,6 +30,8 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
   const player = usePlayer();
   const uploadModal = useUploadModal();
   const authModal = useAuthModal();
+  const createPlaylistModal = useCreatePlaylistModal(); // HOOK BARU
+
   const { user } = useUser();
 
   const routes = useMemo(() => [
@@ -44,12 +49,20 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
     },
   ], [pathname]);
 
+  // Fungsi untuk membuka modal Upload Musik
   const onUploadClick = () => {
     if (!user) {
       return authModal.onOpen();
     }
-    // Karena kita sudah matikan premium check di Library.tsx, ini akan langsung buka modal upload
     uploadModal.onOpen();
+  };
+
+  // Fungsi untuk membuka modal Buat Playlist
+  const onCreatePlaylistClick = () => {
+    if (!user) {
+      return authModal.onOpen();
+    }
+    createPlaylistModal.onOpen();
   };
 
   return (
@@ -92,17 +105,23 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
          <Box className="h-full justify-center">
            <div className="flex flex-row justify-between items-end w-full px-8 h-full pb-1">
              
-             {/* Tombol Home */}
+             {/* 1. Tombol Home (Kiri) */}
              <SidebarItem {...routes[0]} />
 
-             {/* TOMBOL UPLOAD TENGAH */}
+             {/* 2. TOMBOL UPLOAD MUSIK (BARU) */}
+             {/* Tambahkan tombol kecil di samping Home untuk Upload Musik */}
+             <button onClick={onUploadClick} className="text-neutral-400 hover:text-white mb-2">
+                <AiOutlinePlus size={24} />
+             </button>
+
+             {/* 3. TOMBOL BUAT PLAYLIST (TENGAH, Tombol Besar) */}
              <div className="relative -top-5">
                 <button 
-                  onClick={onUploadClick}
+                  onClick={onCreatePlaylistClick} // Panggil fungsi Playlist yang baru
                   className="
                     h-16 w-16
                     rounded-full
-                    bg-green-500
+                    bg-green-500 // Warna Hijau Spotify untuk tombol utama
                     flex items-center justify-center
                     hover:scale-105 hover:bg-green-400
                     transition
@@ -110,13 +129,16 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
                     border-[4px] border-black
                   "
                 >
-                  <AiOutlinePlus className="text-black font-bold" size={32} />
+                  {/* Icon Playlist di tombol utama */}
+                  <MdOutlinePlaylistAdd className="text-black font-bold" size={32} />
                 </button>
              </div>
 
-             {/* Tombol Search */}
+             {/* 4. Tombol Search (Kanan) */}
              <SidebarItem {...routes[1]} />
              
+             {/* 5. Tombol Kosong (untuk keseimbangan layout) */}
+             <div className="w-[24px]"></div>
            </div>
          </Box>
       </div>
