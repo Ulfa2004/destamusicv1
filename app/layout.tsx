@@ -2,7 +2,7 @@ import { Figtree } from 'next/font/google'
 
 import getSongsByUserId from '@/actions/getSongsByUserId'
 import getActiveProductsWithPrices from '@/actions/getActiveProductsWithPrices'
-// [HAPUS SEMENTARA] import getPlaylistsByUserId from '@/actions/getPlaylistsByUserId'; 
+// [DIHAPUS] import getPlaylistsByUserId from '@/actions/getPlaylistsByUserId'; 
 
 import Sidebar from '@/components/Sidebar'
 import ToasterProvider from '@/providers/ToasterProvider'
@@ -29,7 +29,7 @@ export default async function RootLayout({
 }) {
   const products = await getActiveProductsWithPrices();
   const userSongs = await getSongsByUserId();
-  // [HAPUS SEMENTARA] const userPlaylists = await getPlaylistsByUserId(); 
+  // [DIHAPUS] const userPlaylists = await getPlaylistsByUserId(); 
 
   return (
     <html lang="en">
@@ -38,7 +38,7 @@ export default async function RootLayout({
         <SupabaseProvider>
           <UserProvider>
             <ModalProvider products={products} />
-            {/* HAPUS 'playlists={userPlaylists}' DARI SINI */}
+            {/* [DIHAPUS] prop playlists={userPlaylists} */}
             <Sidebar songs={userSongs}> 
               {children}
             </Sidebar>
