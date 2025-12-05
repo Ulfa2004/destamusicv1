@@ -41,11 +41,12 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
     <div 
       className={twMerge(`
         flex 
-        flex-col-reverse   // UBAHAN 1: Di HP, menu pindah ke BAWAH (Main content di atas)
-        md:flex-row        // Di Laptop, menu tetap di KIRI
+        flex-col-reverse 
+        md:flex-row 
         h-full
-        `,
-        player.activeId && 'h-[calc(100%-80px)]'
+        `
+        // BAGIAN YANG DIHAPUS: Saya membuang logic pengurangan tinggi di sini.
+        // Sekarang layar akan selalu Full Screen walau ada lagu diputar.
       )}
     >
       <div 
@@ -72,10 +73,9 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
         </Box>
       </div>
 
-      {/* --- MENU KHUSUS HP (BOTTOM BAR) --- */}
+      {/* --- MENU BAWAH (HP) --- */}
       <div className="md:hidden fixed bottom-0 w-full bg-black z-40 p-2 border-t border-neutral-800">
          <Box>
-           {/* UBAHAN 2: Tombol disusun MENYAMPING (flex-row) dan rata tengah */}
            <div className="flex flex-row justify-around items-center w-full px-2 py-2">
              {routes.map((item) => (
                 <SidebarItem key={item.label} {...item} />
@@ -84,7 +84,12 @@ const Sidebar = ({ children, songs }: SidebarProps) => {
          </Box>
       </div>
       
-      <main className="h-full flex-1 overflow-y-auto py-2 mb-[80px] md:mb-0">
+      {/* PERBAIKAN UTAMA DI SINI:
+         - mb-[80px] diganti jadi pb-[150px].
+         - Artinya: Background ditarik full ke bawah, tapi isi konten didorong ke atas (padding)
+           supaya tidak ketutup tombol Home & Player.
+      */}
+      <main className="h-full flex-1 overflow-y-auto py-2 pb-[150px] md:pb-0">
         {children}
       </main>
     </div>
